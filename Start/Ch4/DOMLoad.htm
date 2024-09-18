@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Load External XML</title>
+        <script type="text/javascript">
+            /**
+             * Load an external XML file and return a parsed DOM object from it.
+             * @param {string} docURL - The URL of the XML file to load.
+             * @returns {Promise<Document>} - A promise that resolves with the parsed
+             *  DOM object.
+             */
+            async function loadXMLDoc(docURL) {
+                // Fetch the XML file from the server.
+                const doc = await fetch(docURL);
+
+                // Read the response as a text string.
+                const response = await doc.text();
+
+                // Parse the string into a DOM object.
+                const xml = new DOMParser().parseFromString(response, "text/xml");
+
+                // Return the parsed DOM object.
+                return xml;
+            }
+
+            /**
+             * Load the business card XML file, parse it, and display the data from
+             * the first BusinessCard element in the file.
+             */
+            async function displayBusinessCardData() {
+                // Load the XML file from the server.
+                const xml = await loadXMLDoc("businesscard.xml");
+
+                // Get the first BusinessCard element from the parsed DOM object.
+                const bizCard = xml.getElementsByTagName("BusinessCard")[0];
+
+                // Get the text content from the Name element.
+                const name = "Name: " + bizCard.getElementsByTagName("Name")[0].firstChild.data;
+
+                // Get the text content from the email element.
+                const email = "email: " + bizCard.getElementsByTagName("email")[0].firstChild.data;
+
+                // Alert the user with the extracted data.
+                alert(`BusinessCard Data:\n\n${name}\n${email}`);
+            }
+
+            window.addEventListener("load", function () {
+                document
+                    .getElementById("showBCardData")
+                    .addEventListener("click", displayBusinessCardData);
+            });
+        </script>
+        <link rel="stylesheet" href="businesscard.css" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <button id="showBCardData">Show Business Card Data</button>
+    </body>
+</html>

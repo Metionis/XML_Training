@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Our Products</title>
+        <style>
+            h1 {
+                color: #0d3427;
+            }
+            img {
+                margin: 0px 10px 0px 10px;
+            }
+            body {
+                background-color: #dacfe5;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            table {
+                border: 1px solid gray;
+                border-spacing: 0;
+            }
+            th {
+                font-size: 18pt;
+                border-bottom: 1px solid gray;
+            }
+            tbody {
+                font-size: 15pt;
+            }
+            td {
+                padding: 10pt;
+            }
+        </style>
+        <script>
+            /**
+             * Asynchronously load an XML document from a URL and return the XMLDocument object.
+             * @param {string} docURL - The URL of the XML document to load.
+             * @returns {Promise.<XMLDocument>} A promise that resolves to an XMLDocument object for the loaded document.
+             */
+            async function loadXMLDocument(docURL) {
+                // Fetch the document from the URL
+                let result = await fetch(docURL);
+                // Convert the response to text
+                let response = await result.text();
+                // Parse the text as an XML document
+                let doc = new DOMParser().parseFromString(response, "text/xml");
+                // Return the parsed XMLDocument object
+                return doc;
+            }
+
+            /**
+             * Asynchronously load an XML and XSLT document and transform the XML using the XSLT.
+             * @returns {Promise.<DocumentFragment>} A promise that resolves to a DocumentFragment object representing the transformed XML.
+             */
+            async function loadProducts() {
+                // Load the XML and XSLT documents
+                const xmlPromise = loadXMLDocument("clienttransform.xml");
+                const xslPromise = loadXMLDocument("clienttransform.xslt");
+                const [xml, xsl] = await Promise.all([xmlPromise, xslPromise]);
+
+                // Create an XSLTProcessor object to perform the transform
+                const processor = new XSLTProcessor();
+                processor.importStylesheet(xsl);
+                
+                // Create and return an HTML fragment we can add to the doc
+                const list = processor.transformToFragment(xml, document);
+                return list;
+            }
+
+            window.addEventListener("load", (e) => {
+                loadProducts()
+                    .then(list => document.getElementById("productlist").append(list));
+            });
+        </script>
+    </head>
+    <body>
+        <h1><img src="photos/javaco_tea_logo.gif" /> Our Products:</h1>
+        <div id="productlist">
+        </div>
+    </body>
+</html>
